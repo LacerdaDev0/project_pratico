@@ -1,23 +1,36 @@
 
 import React from 'react';
-import { AppTab, UserRole } from '../types';
-import { Home, Map as MapIcon, Calendar, User, MessageSquare, Wallet } from 'lucide-react';
+import { AppTab, UserRole, User } from '../types';
+import { Home, Map as MapIcon, Calendar, User as UserIcon, MessageSquare, Wallet, Layers, Star, ClipboardCheck } from 'lucide-react';
 
 interface NavbarProps {
   activeTab: AppTab;
   setActiveTab: (tab: AppTab) => void;
+  user?: User | null;
   userRole: UserRole;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, userRole }) => {
+const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, user, userRole }) => {
   const isInstructor = userRole === 'instructor';
+  const isCredentialed = user?.isCredentialed;
 
   const tabs = [
     { id: AppTab.FEED, icon: Home, label: 'Início' },
-    ...(!isInstructor ? [{ id: AppTab.MAP, icon: MapIcon, label: 'Mapa' }] : [{ id: AppTab.WALLET, icon: Wallet, label: 'Carteira' }]),
-    { id: AppTab.CHAT_LIST, icon: MessageSquare, label: 'Conversas' },
-    { id: AppTab.SCHEDULES, icon: Calendar, label: 'Agenda' },
-    { id: AppTab.PROFILE, icon: User, label: 'Perfil' },
+    ...(isInstructor 
+      ? [{ id: AppTab.WALLET, icon: Wallet, label: 'Carteira' }] 
+      : isCredentialed 
+        ? [{ id: AppTab.MAP, icon: Layers, label: 'Aulas' }] 
+        : [{ id: AppTab.MAP, icon: MapIcon, label: 'Mapa' }]
+    ),
+    ...(isCredentialed 
+      ? [{ id: AppTab.STUDIES, icon: Star, label: 'Estudos' }]
+      : [{ id: AppTab.CHAT_LIST, icon: MessageSquare, label: 'Conversas' }]
+    ),
+    ...(isCredentialed
+      ? [{ id: AppTab.SIMULADO, icon: ClipboardCheck, label: 'Simulado' }]
+      : [{ id: AppTab.SCHEDULES, icon: Calendar, label: 'Agenda' }]
+    ),
+    { id: AppTab.PROFILE, icon: UserIcon, label: 'Perfil' },
   ];
 
   return (

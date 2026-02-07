@@ -1,10 +1,12 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Post, UserRole, MOCK_INSTRUCTORS } from '../types';
-import { Heart, Bookmark, MoreHorizontal, Search, Calendar, Layers, PlusSquare, RefreshCw, Loader2, ChevronRight, Wallet } from 'lucide-react';
+import { Post, UserRole, User, MOCK_INSTRUCTORS } from '../types';
+// Fixed: Added CheckCircle2 and ClipboardCheck to the imports from lucide-react
+import { Heart, Bookmark, MoreHorizontal, Search, Calendar, Layers, PlusSquare, RefreshCw, Loader2, ChevronRight, Wallet, User as UserIcon, BookOpen, Clock, Fingerprint, Star, GraduationCap, CheckCircle2, ClipboardCheck } from 'lucide-react';
 import { getInstructorAdvice } from '../services/geminiService';
 
 interface FeedProps {
+  user?: User;
   userName: string;
   userRole: UserRole;
   posts: Post[];
@@ -15,15 +17,19 @@ interface FeedProps {
   onCreatePost: (caption: string) => void;
   onLoadMore: () => void;
   isLoadingMore: boolean;
+  onViewPractical?: () => void;
+  onViewTheoretical?: () => void;
+  onViewStudies?: () => void;
+  onViewSimulado?: () => void;
 }
 
-const Feed: React.FC<FeedProps> = ({ userName, userRole, posts, onBook, onViewSchedules, onSearch, onViewWallet, onCreatePost, onLoadMore, isLoadingMore }) => {
+const Feed: React.FC<FeedProps> = ({ user, userName, userRole, posts, onBook, onViewSchedules, onSearch, onViewWallet, onCreatePost, onLoadMore, isLoadingMore, onViewPractical, onViewTheoretical, onViewStudies, onViewSimulado }) => {
   const [aiTip, setAiTip] = useState<string>("");
   const [isUpdating, setIsUpdating] = useState(false);
-  const [activeStoryId, setActiveStoryId] = useState<string | null>(null);
   const observerRef = useRef<HTMLDivElement | null>(null);
 
   const isInstructor = userRole === 'instructor';
+  const isCredentialed = user?.isCredentialed;
 
   const fetchNewTip = async () => {
     if (isUpdating) return;
@@ -46,7 +52,7 @@ const Feed: React.FC<FeedProps> = ({ userName, userRole, posts, onBook, onViewSc
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && !isLoadingMore) {
+        if (entries[0].isIntersecting && !isLoadingMore && !isCredentialed) {
           onLoadMore();
         }
       },
@@ -58,15 +64,167 @@ const Feed: React.FC<FeedProps> = ({ userName, userRole, posts, onBook, onViewSc
     }
 
     return () => observer.disconnect();
-  }, [isLoadingMore, onLoadMore]);
+  }, [isLoadingMore, onLoadMore, isCredentialed]);
 
-  const recommendedInstructors = MOCK_INSTRUCTORS.slice(3, 6);
   const followedInstructors = MOCK_INSTRUCTORS.slice(0, 4);
 
+  // View para Aluno Credenciado
+  if (isCredentialed) {
+    return (
+      <div className="flex flex-col bg-slate-50 dark:bg-slate-950 min-h-full transition-colors duration-500 pb-20">
+        {/* Header de Aluno Autoescola */}
+        <div className="bg-white dark:bg-slate-900 px-6 py-8 rounded-b-[2.5rem] shadow-sm border-b border-gray-100 dark:border-slate-800">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex flex-col gap-1">
+              <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Olá, {userName}!</h2>
+              <div className="flex items-center gap-2 text-slate-400 font-bold text-[10px] uppercase tracking-widest">
+                <Fingerprint size={12} className="text-blue-600" />
+                CPF: {user?.cpf ? `${user.cpf.slice(0, 3)}.***.***-${user.cpf.slice(-2)}` : '***.***.***-**'}
+              </div>
+            </div>
+            <div className="w-14 h-14 rounded-2xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 shadow-inner">
+               <GraduationCap size={28} />
+            </div>
+          </div>
+
+          <div className="bg-blue-600 rounded-[2rem] p-6 text-white shadow-2xl shadow-blue-100 dark:shadow-none relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:rotate-12 transition-transform duration-1000">
+              <Calendar size={100} />
+            </div>
+            <div className="relative z-10">
+              <span className="text-blue-100 text-[9px] font-black uppercase tracking-[0.25em]">Próxima Aula</span>
+              <h3 className="text-xl font-black mt-1 mb-4">Direção Defensiva</h3>
+              <div className="flex gap-4">
+                <div className="flex items-center gap-2 bg-white/20 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10">
+                  <Calendar size={14} />
+                  <span className="text-xs font-bold uppercase tracking-widest">22 Mai</span>
+                </div>
+                <div className="flex items-center gap-2 bg-white/20 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10">
+                  <Clock size={14} />
+                  <span className="text-xs font-bold uppercase tracking-widest">08:30</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Ícones de Navegação Rápida - Atualizado para 4 colunas */}
+        <div className="grid grid-cols-4 gap-2 px-4 mt-8">
+          <button 
+            onClick={onViewPractical}
+            className="bg-white dark:bg-slate-900 p-3 rounded-[1.5rem] border border-gray-100 dark:border-slate-800 shadow-sm flex flex-col items-center gap-2 active:scale-95 transition-all"
+          >
+            <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl flex items-center justify-center text-indigo-600"><Layers size={18} /></div>
+            <span className="text-[8px] font-black uppercase tracking-tight text-slate-500 dark:text-slate-400">Práticas</span>
+          </button>
+          <button 
+            onClick={onViewTheoretical}
+            className="bg-white dark:bg-slate-900 p-3 rounded-[1.5rem] border border-gray-100 dark:border-slate-800 shadow-sm flex flex-col items-center gap-2 active:scale-95 transition-all"
+          >
+            <div className="w-10 h-10 bg-amber-50 dark:bg-amber-900/20 rounded-xl flex items-center justify-center text-amber-600"><BookOpen size={18} /></div>
+            <span className="text-[8px] font-black uppercase tracking-tight text-slate-500 dark:text-slate-400">Teóricas</span>
+          </button>
+          <button 
+            onClick={onViewStudies}
+            className="bg-white dark:bg-slate-900 p-3 rounded-[1.5rem] border border-gray-100 dark:border-slate-800 shadow-sm flex flex-col items-center gap-2 active:scale-95 transition-all"
+          >
+            <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl flex items-center justify-center text-emerald-600"><Star size={18} /></div>
+            <span className="text-[8px] font-black uppercase tracking-tight text-slate-500 dark:text-slate-400">Estudos</span>
+          </button>
+          <button 
+            onClick={onViewSimulado}
+            className="bg-white dark:bg-slate-900 p-3 rounded-[1.5rem] border border-gray-100 dark:border-slate-800 shadow-sm flex flex-col items-center gap-2 active:scale-95 transition-all"
+          >
+            <div className="w-10 h-10 bg-rose-50 dark:bg-rose-900/20 rounded-xl flex items-center justify-center text-rose-600"><ClipboardCheck size={18} /></div>
+            <span className="text-[8px] font-black uppercase tracking-tight text-slate-500 dark:text-slate-400">Simulado</span>
+          </button>
+        </div>
+
+        {/* Painel de Aulas Práticas */}
+        <div className="px-6 mt-10" onClick={onViewPractical}>
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="font-black text-sm text-slate-900 dark:text-white uppercase tracking-[0.2em]">Minhas Aulas Práticas</h3>
+            <ChevronRight className="text-slate-300" size={20} />
+          </div>
+          
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-[2.5rem] border border-gray-100 dark:border-slate-800 shadow-sm">
+             <div className="flex items-center gap-4 mb-6">
+               <div className="w-14 h-14 rounded-2xl overflow-hidden border border-gray-100">
+                  <img src="https://picsum.photos/seed/instrutor/100/100" className="w-full h-full object-cover" />
+               </div>
+               <div>
+                  <h4 className="font-black text-slate-900 dark:text-white">Ricardo Mendes</h4>
+                  <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Instrutor Designado</p>
+               </div>
+               <div className="ml-auto bg-green-50 dark:bg-green-900/20 text-green-600 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest">
+                  12/20
+               </div>
+             </div>
+             
+             <div className="grid grid-cols-2 gap-3">
+                <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl">
+                   <span className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Data da Aula</span>
+                   <span className="text-xs font-black text-slate-700 dark:text-slate-300">Quinta, 22 Mai</span>
+                </div>
+                <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl">
+                   <span className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Horário</span>
+                   <span className="text-xs font-black text-slate-700 dark:text-slate-300">08:30 - 09:20</span>
+                </div>
+             </div>
+          </div>
+        </div>
+
+        {/* Painel de Aulas Teóricas */}
+        <div className="px-6 mt-10" onClick={onViewTheoretical}>
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="font-black text-sm text-slate-900 dark:text-white uppercase tracking-[0.2em]">Painel Teórico</h3>
+            <div className="bg-amber-50 dark:bg-amber-900/20 text-amber-600 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest">85% Completo</div>
+          </div>
+
+          <div className="space-y-3">
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-gray-100 dark:border-slate-800 flex items-center justify-between group cursor-pointer hover:border-blue-100 dark:hover:border-blue-900 transition-colors">
+               <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-slate-50 dark:bg-slate-800 rounded-xl flex items-center justify-center text-slate-400"><CheckCircle2 size={18} className="text-green-500" /></div>
+                  <div>
+                     <p className="text-xs font-black text-slate-900 dark:text-white">Legislação de Trânsito</p>
+                     <p className="text-[9px] font-bold text-slate-400 uppercase">Concluído • 12 Aulas</p>
+                  </div>
+               </div>
+               <ChevronRight size={16} className="text-slate-200" />
+            </div>
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-gray-100 dark:border-slate-800 flex items-center justify-between group cursor-pointer border-l-4 border-l-blue-600">
+               <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center text-blue-600"><Clock size={18} /></div>
+                  <div>
+                     <p className="text-xs font-black text-slate-900 dark:text-white">Primeiros Socorros</p>
+                     <p className="text-[9px] font-bold text-blue-600 uppercase">Em progresso • Aula 3/4</p>
+                  </div>
+               </div>
+               <div className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* AI Tip Adaptado para o Dashboard do Aluno */}
+        <div className="px-6 mt-10">
+          <div className="bg-gradient-to-br from-slate-900 to-slate-800 dark:from-slate-800 dark:to-slate-700 rounded-[2.5rem] p-8 text-white relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 opacity-5 rotate-12"><RefreshCw size={80} /></div>
+            <div className="flex items-center gap-2 mb-4">
+              <RefreshCw size={14} className="text-blue-400" />
+              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-blue-400">Lembrete da Autoescola</span>
+            </div>
+            <p className="text-sm font-bold leading-relaxed text-slate-200 italic">"Lembre-se de portar seu documento de identidade original para todas as aulas presenciais."</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // View Padrão do Feed (mantida para outros tipos de usuário)
   return (
     <div className="flex flex-col bg-white dark:bg-slate-950 transition-colors duration-500">
       
-      {/* Stories Section - Style Instagram (Updated Purple Theme) */}
+      {/* Stories Section */}
       <div className="flex gap-4 overflow-x-auto px-6 py-6 hide-scrollbar border-b border-gray-50 dark:border-slate-900">
         {followedInstructors.map((inst) => (
           <div key={inst.id} className="flex flex-col items-center gap-1.5 flex-shrink-0 cursor-pointer group">
@@ -146,7 +304,7 @@ const Feed: React.FC<FeedProps> = ({ userName, userRole, posts, onBook, onViewSc
           
           <button 
             onClick={onViewSchedules}
-            className="bg-gradient-to-br from-slate-900 to-slate-800 dark:from-slate-800 dark:to-slate-700 rounded-[2.5rem] p-6 text-left shadow-2xl shadow-gray-200 dark:shadow-none hover:from-black hover:to-slate-900 active:scale-95 transition-all flex flex-col justify-between h-40 group relative overflow-hidden"
+            className="bg-gradient-to-br from-slate-900 to-slate-800 dark:from-slate-800 dark:to-slate-700 rounded-[2.5rem] p-6 text-left shadow-2xl shadow-gray-200 dark:shadow-none hover:from-black hover:to-slate-900 active:scale-[0.97] transition-all flex flex-col justify-between h-40 group relative overflow-hidden"
           >
             <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
             <div className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-white relative z-10 shadow-inner">
@@ -235,38 +393,6 @@ const Feed: React.FC<FeedProps> = ({ userName, userRole, posts, onBook, onViewSc
                 <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Gerando mais novidades...</span>
               </div>
             )}
-          </div>
-        </div>
-
-        {/* Algorithm Recommendation Section */}
-        <div className="bg-gray-50/70 dark:bg-slate-900/50 py-10 px-6 mt-4">
-          <div className="flex justify-between items-center mb-8">
-            <div>
-              <h3 className="font-black text-lg text-gray-900 dark:text-white leading-tight">Recomendados para você</h3>
-              <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mt-1">Instrutores perto da sua localidade</p>
-            </div>
-            <button onClick={onSearch} className="text-blue-600 text-[10px] font-black uppercase tracking-widest hover:underline">Ver Tudo</button>
-          </div>
-
-          <div className="flex gap-5 overflow-x-auto hide-scrollbar pb-4">
-            {recommendedInstructors.map((inst) => (
-              <div key={inst.id} className="bg-white dark:bg-slate-950 p-6 rounded-[3rem] shadow-xl shadow-gray-100 dark:shadow-none border border-gray-100 dark:border-slate-800 flex flex-col items-center text-center min-w-[220px] flex-shrink-0 animate-in zoom-in duration-500">
-                <div className="relative mb-5">
-                  <img src={inst.avatar} alt={inst.name} className="w-24 h-24 rounded-[2rem] object-cover shadow-lg" />
-                  <div className="absolute -bottom-2 -right-2 bg-blue-600 text-white text-[9px] font-black px-2.5 py-1.5 rounded-xl border-4 border-white dark:border-slate-950">
-                    {inst.distance}km
-                  </div>
-                </div>
-                <h4 className="font-black text-gray-900 dark:text-white text-base mb-1">{inst.name}</h4>
-                <p className="text-[10px] text-gray-400 font-bold uppercase mb-6">{inst.specialty}</p>
-                <button 
-                  onClick={() => onBook(inst.name, inst.avatar)}
-                  className="w-full bg-gray-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest hover:bg-blue-50 transition-all border border-blue-50 dark:border-transparent"
-                >
-                  Ver Perfil
-                </button>
-              </div>
-            ))}
           </div>
         </div>
       </div>

@@ -7,7 +7,9 @@ export enum AppTab {
   PROFILE = 'profile',
   CHAT = 'chat',
   CHAT_LIST = 'chat_list',
-  INSTRUCTOR_PROFILE = 'instructor_profile'
+  INSTRUCTOR_PROFILE = 'instructor_profile',
+  STUDIES = 'studies',
+  SIMULADO = 'simulado'
 }
 
 export type UserRole = 'student' | 'instructor' | null;
@@ -25,6 +27,8 @@ export interface User {
   name: string;
   email: string;
   role: UserRole;
+  isCredentialed?: boolean;
+  cpf?: string;
   vehicle?: VehicleInfo;
   bio?: string;
   experience?: string;

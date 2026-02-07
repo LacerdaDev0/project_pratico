@@ -197,7 +197,8 @@ const Landing: React.FC<LandingProps> = ({ onLoginSuccess }) => {
         id: userFound.id,
         name: userFound.name,
         email: userFound.email,
-        role: userFound.role
+        role: userFound.role,
+        isCredentialed: false
       });
     } else {
       // Verifica se o e-mail existe em outro papel para dar feedback específico
@@ -220,12 +221,15 @@ const Landing: React.FC<LandingProps> = ({ onLoginSuccess }) => {
       return;
     }
 
-    if ((cpf.trim() === '10' && password.trim() === '10') || (cpf.trim() === 'teste' && password.trim() === 'teste')) {
+    // Test Key: CPF 123 e Senha pratico
+    if ((cpf.trim() === '123' && password.trim() === 'pratico') || (cpf.trim() === 'teste' && password.trim() === 'teste') || (cpf.trim() === '10' && password.trim() === '10')) {
       onLoginSuccess({
         id: `acc-${Date.now()}`,
-        name: 'Usuário Teste (Credenciado)',
-        email: 'teste@autoescola.br',
-        role: 'student'
+        name: 'Gabriel Lacerda',
+        email: 'aluno@autoescola.br',
+        role: 'student',
+        isCredentialed: true,
+        cpf: cpf.trim()
       });
     } else {
       setErrorType('invalid');
@@ -264,21 +268,20 @@ const Landing: React.FC<LandingProps> = ({ onLoginSuccess }) => {
 
   const handleInstructorValidationNext = () => {
     const cpfClean = cpf.replace(/\D/g, '');
-    if (cpfClean.length !== 11 && cpfClean !== 'teste') {
+    if (cpfClean.length !== 11 && cpfClean !== 'teste' && cpfClean !== '123') {
       setErrorType('invalid_cpf');
       return;
     }
 
-    if (!dob && cpfClean !== 'teste') {
+    if (!dob && cpfClean !== 'teste' && cpfClean !== '123') {
       setErrorType('empty');
       return;
     }
 
-    if (cpfClean !== 'teste') {
+    if (cpfClean !== 'teste' && cpfClean !== '123') {
       const birthDate = new Date(dob);
       const today = new Date();
       let age = today.getFullYear() - birthDate.getFullYear();
-      // Use getMonth() instead of non-existent property month to fix line 281
       const m = today.getMonth() - birthDate.getMonth();
       if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
         age--;
@@ -311,7 +314,7 @@ const Landing: React.FC<LandingProps> = ({ onLoginSuccess }) => {
       return;
     }
 
-    if (plate !== 'teste' && !plateRegex.test(plate.trim().replace(' ', ''))) {
+    if (plate !== 'teste' && plate !== '123' && !plateRegex.test(plate.trim().replace(' ', ''))) {
       setErrorType('invalid_plate');
       return;
     }
@@ -349,7 +352,8 @@ const Landing: React.FC<LandingProps> = ({ onLoginSuccess }) => {
         id: `google-${Date.now()}`,
         name: userName,
         email: userEmail,
-        role: selectedRole
+        role: selectedRole,
+        isCredentialed: false
       });
     }, 1200);
   };
@@ -716,15 +720,15 @@ const Landing: React.FC<LandingProps> = ({ onLoginSuccess }) => {
             ACESSO CREDENCIADO
           </h2>
           <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.25em] mb-10">
-            CONECTE-SE WITH SUA AUTOESCOLA
+            CONECTE-SE COM SUA AUTOESCOLA
           </p>
 
           <div className="w-full flex flex-col gap-4 mb-8">
-            <div className="relative">
+            <div className={`relative ${errorType === 'invalid' ? 'border border-red-300 rounded-3xl' : ''}`}>
               <select 
                 value={school}
                 onChange={(e) => { setSchool(e.target.value); setErrorType(null); }}
-                className={`w-full bg-gray-50 border-2 ${errorType === 'empty' && !school ? 'border-red-200' : 'border-transparent'} rounded-3xl px-6 py-4 text-sm font-semibold focus:ring-2 focus:ring-blue-100 transition-all outline-none text-gray-700 appearance-none`}
+                className={`w-full bg-gray-50 border-2 ${errorType === 'empty' && !school ? 'border-red-300' : 'border-transparent'} rounded-3xl px-6 py-4 text-sm font-semibold focus:ring-2 focus:ring-blue-100 transition-all outline-none text-gray-700 appearance-none`}
               >
                 <option value="">Selecione sua Autoescola</option>
                 {MOCK_PARTNER_SCHOOLS.map(s => <option key={s} value={s}>{s}</option>)}
@@ -738,7 +742,7 @@ const Landing: React.FC<LandingProps> = ({ onLoginSuccess }) => {
                 placeholder="CPF do Aluno" 
                 value={cpf}
                 onChange={(e) => { setCpf(e.target.value); setErrorType(null); }}
-                className={`w-full bg-gray-50 border-2 ${(errorType === 'empty' && !cpf) || errorType === 'invalid' ? 'border-red-200' : 'border-transparent'} rounded-3xl px-6 py-4 text-sm font-semibold focus:ring-2 focus:ring-blue-100 transition-all outline-none text-gray-700`}
+                className={`w-full bg-gray-50 border-2 ${errorType === 'invalid' || (errorType === 'empty' && !cpf) ? 'border-red-300' : 'border-transparent'} rounded-3xl px-6 py-4 text-sm font-semibold focus:ring-2 focus:ring-blue-100 transition-all outline-none text-gray-700`}
               />
               <Fingerprint className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-200" size={18} />
             </div>
@@ -749,21 +753,27 @@ const Landing: React.FC<LandingProps> = ({ onLoginSuccess }) => {
                 placeholder="Senha da Autoescola" 
                 value={password}
                 onChange={(e) => { setPassword(e.target.value); setErrorType(null); }}
-                className={`w-full bg-gray-50 border-2 ${(errorType === 'empty' && !password) || errorType === 'invalid' ? 'border-red-200' : 'border-transparent'} rounded-3xl px-6 py-4 text-sm font-semibold focus:ring-2 focus:ring-blue-100 transition-all outline-none text-gray-700`}
+                className={`w-full bg-gray-50 border-2 ${errorType === 'invalid' || (errorType === 'empty' && !password) ? 'border-red-300' : 'border-transparent'} rounded-3xl px-6 py-4 text-sm font-semibold focus:ring-2 focus:ring-blue-100 transition-all outline-none text-gray-700`}
               />
               <Lock className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-200" size={18} />
             </div>
 
-            {(errorType === 'empty' || errorType === 'invalid') && (
-              <p className="text-[10px] font-bold text-red-500 uppercase tracking-wider mt-2">
-                {errorType === 'empty' ? 'Preencha todos os dados credenciados' : 'CPF ou senha credenciada incorretos'}
+            {errorType === 'invalid' && (
+              <p className="text-[10px] font-black text-red-500 uppercase tracking-widest mt-2 animate-in fade-in slide-in-from-top-1">
+                CPF OU SENHA CREDENCIADA INCORRETOS
+              </p>
+            )}
+            
+            {errorType === 'empty' && (
+              <p className="text-[10px] font-black text-red-500 uppercase tracking-widest mt-2 animate-in fade-in slide-in-from-top-1">
+                PREENCHA TODOS OS CAMPOS
               </p>
             )}
           </div>
 
           <button 
             onClick={handleAutoescolaEntry}
-            className="w-full bg-gradient-to-r from-blue-600 to-blue-500 text-white py-5 rounded-[2.5rem] font-bold text-sm tracking-widest shadow-2xl shadow-blue-400/30 hover:from-blue-700 hover:to-blue-600 active:scale-[0.98] transition-all uppercase mb-10 relative overflow-hidden group"
+            className="w-full bg-blue-600 text-white py-5 rounded-[2.5rem] font-bold text-sm tracking-widest shadow-2xl shadow-blue-400/30 hover:bg-blue-700 active:scale-[0.98] transition-all uppercase mb-10 relative overflow-hidden group"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
             <span className="relative z-10">CONECTAR AGORA</span>
@@ -774,8 +784,15 @@ const Landing: React.FC<LandingProps> = ({ onLoginSuccess }) => {
             className="flex items-center gap-2 text-gray-400 font-bold text-xs hover:text-blue-500 transition-colors uppercase tracking-widest"
           >
             <ArrowLeft size={16} strokeWidth={2.5} />
-            Voltar
+            VOLTAR
           </button>
+        </div>
+
+        <div className="absolute bottom-10 left-0 right-0">
+          <p className="text-[9px] font-black text-gray-300 uppercase tracking-[0.25em] leading-relaxed max-w-[280px] mx-auto">
+            AO ENTRAR, VOCÊ CONCORDA COM NOSSOS<br/>
+            <span className="text-gray-400 cursor-pointer hover:text-blue-500 transition-colors underline decoration-gray-200">TERMOS DE USO</span> E <span className="text-gray-400 cursor-pointer hover:text-blue-500 transition-colors underline decoration-gray-200">PRIVACIDADE</span>.
+          </p>
         </div>
       </div>
     );

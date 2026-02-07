@@ -12,6 +12,9 @@ import InstructorProfile from './components/InstructorProfile';
 import Onboarding from './components/Onboarding';
 import Navbar from './components/Navbar';
 import Landing from './components/Landing';
+import ClassesView from './components/ClassesView';
+import StudiesView from './components/StudiesView';
+import SimuladoView from './components/SimuladoView';
 import { BrandLogo } from './components/Landing';
 import { Moon, Sun } from 'lucide-react';
 
@@ -93,6 +96,7 @@ const App: React.FC = () => {
   const [chatDraft, setChatDraft] = useState<string | null>(null);
   const [showQuickActions, setShowQuickActions] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [classesMode, setClassesMode] = useState<'practical' | 'theoretical'>('practical');
   
   // Dynamic App State
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -102,7 +106,7 @@ const App: React.FC = () => {
 
   const handleLogin = (user: User) => {
     setCurrentUser(user);
-    if (user.role === 'instructor') {
+    if (user.role === 'instructor' || user.isCredentialed) {
       setOnboardingCompleted(true);
     } else {
       setOnboardingCompleted(false);
@@ -296,6 +300,7 @@ const App: React.FC = () => {
       case AppTab.FEED:
         return (
           <Feed 
+            user={currentUser}
             userName={currentUser.name}
             userRole={currentUser.role}
             posts={posts}
@@ -306,9 +311,26 @@ const App: React.FC = () => {
             onCreatePost={handleCreatePost}
             onLoadMore={handleLoadMorePosts}
             isLoadingMore={isLoadingMore}
+            onViewPractical={() => {
+              setClassesMode('practical');
+              setActiveTab(AppTab.MAP);
+            }}
+            onViewTheoretical={() => {
+              setClassesMode('theoretical');
+              setActiveTab(AppTab.MAP);
+            }}
+            onViewStudies={() => setActiveTab(AppTab.STUDIES)}
+            onViewSimulado={() => setActiveTab(AppTab.SIMULADO)}
           />
         );
       case AppTab.MAP:
+        if (currentUser.isCredentialed) {
+          return (
+            <ClassesView 
+              initialMode={classesMode}
+            />
+          );
+        }
         return (
           <MapView 
             onBook={(id, name, avatar) => handleRequestLesson(id, name, avatar)}
@@ -356,6 +378,10 @@ const App: React.FC = () => {
             onManageKey={handleOpenApiKeyDialog} 
           />
         );
+      case AppTab.STUDIES:
+        return <StudiesView onStartSimulado={() => setActiveTab(AppTab.SIMULADO)} />;
+      case AppTab.SIMULADO:
+        return <SimuladoView />;
       case AppTab.CHAT:
         return activeThread ? (
           <Chat 
@@ -399,7 +425,7 @@ const App: React.FC = () => {
   return (
     <div className={`flex flex-col h-screen max-w-md mx-auto shadow-2xl overflow-hidden relative transition-colors duration-500 ${isDarkMode ? 'dark bg-slate-950' : 'bg-white'}`}>
       {showChrome && (
-        <header className="px-5 py-4 flex justify-between items-center sticky top-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md z-50 border-b border-gray-50 dark:border-slate-800">
+        <header className="px-5 py-4 flex justify-between items-center sticky top-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md z-50 border-b border-gray-100 dark:border-slate-800">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-white shadow-md">
               <BrandLogo className="w-5 h-5" />
@@ -430,6 +456,7 @@ const App: React.FC = () => {
         <Navbar 
           activeTab={activeTab} 
           setActiveTab={setActiveTab} 
+          user={currentUser}
           userRole={currentUser.role}
         />
       )}
