@@ -12,7 +12,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   const slides = [
     {
       title: "Bem-vindo ao Prático!",
-      description: "O Prático conecta você à sua autoescola e transforma a jornada para conquistar a CNH em uma experiência simples, prática e acessível.",
+      description: "O Prático conecta você à sua autoescola e também aos instrutores mais perto de você, transformando a jornada para conquistar a CNH em uma experiência simples, prática e acessível.",
       icon: <User size={80} className="text-blue-600" />,
       buttonText: "Próximo"
     },

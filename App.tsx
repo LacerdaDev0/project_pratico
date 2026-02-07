@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { AppTab, UserRole, User, Booking, Post, ChatThread, Message, MOCK_INSTRUCTORS } from './types';
 import Feed from './components/Feed';
 import MapView from './components/MapView';
+import WalletView from './components/WalletView';
 import Schedules from './components/Schedules';
 import Profile from './components/Profile';
 import Chat from './components/Chat';
@@ -11,28 +12,75 @@ import InstructorProfile from './components/InstructorProfile';
 import Onboarding from './components/Onboarding';
 import Navbar from './components/Navbar';
 import Landing from './components/Landing';
-import { Moon, Sun, Key } from 'lucide-react';
+import { BrandLogo } from './components/Landing';
+import { Moon, Sun } from 'lucide-react';
 
 const INITIAL_POSTS: Post[] = [
   {
     id: '1',
-    instructorId: 'inst1',
+    instructorId: '1',
     instructorName: 'Rodrigo Silva',
     instructorAvatar: 'https://picsum.photos/seed/rodrigo/100/100',
-    imageUrl: 'https://picsum.photos/seed/surf/600/600',
-    caption: 'Aulas de Surf na Praia do Recreio! 🏄‍♂️ Turmas abertas para iniciantes este final de semana.',
+    instructorCategory: 'Instrutor de Carro',
+    imageUrl: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?q=80&w=1000&auto=format&fit=crop',
+    caption: 'Dica de hoje: Como não deixar o carro morrer na subida! 🚗💨 A técnica do "ponto da embreagem" é essencial. Quer aprender na prática? Agende sua aula!',
     likes: 124,
     timestamp: '2H'
   },
   {
     id: '2',
-    instructorId: 'inst2',
+    instructorId: '2',
     instructorName: 'Ana Oliveira',
     instructorAvatar: 'https://picsum.photos/seed/ana/100/100',
-    imageUrl: 'https://picsum.photos/seed/yoga/600/600',
-    caption: 'Yoga ao pôr do sol hoje foi mágico. Namastê. 🙏 Próxima aula na terça às 17h no Parque Ibirapuera.',
+    instructorCategory: 'Instrutora de Moto',
+    imageUrl: 'https://images.unsplash.com/photo-1558981403-c5f91cbba527?q=80&w=1000&auto=format&fit=crop',
+    caption: 'Equilíbrio é tudo na categoria A! 🏍️ Hoje o treino de "oito" foi intenso com os novos alunos. Parabéns pela evolução de todos!',
     likes: 89,
     timestamp: '5H'
+  },
+  {
+    id: '3',
+    instructorId: '3',
+    instructorName: 'Carlos M.',
+    instructorAvatar: 'https://picsum.photos/seed/carlos/100/100',
+    instructorCategory: 'Carro e Moto',
+    imageUrl: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?q=80&w=1000&auto=format&fit=crop',
+    caption: 'Dominar a troca de marchas é o segredo para uma direção suave. ⚙️ Praticamos muito hoje redução de marcha antes das curvas!',
+    likes: 210,
+    timestamp: '8H'
+  },
+  {
+    id: '4',
+    instructorId: '4',
+    instructorName: 'Beatriz G.',
+    instructorAvatar: 'https://picsum.photos/seed/beatriz/100/100',
+    instructorCategory: 'Instrutora de Carro',
+    imageUrl: 'https://images.unsplash.com/photo-1596484552834-6a58f850e0a1?q=80&w=1000&auto=format&fit=crop',
+    caption: 'Encarar a rodovia pela primeira vez dá um frio na barriga, mas com as técnicas certas você se sente seguro. 🛣️ Orgulho da minha aluna hoje!',
+    likes: 342,
+    timestamp: '12H'
+  },
+  {
+    id: '5',
+    instructorId: '5',
+    instructorName: 'João Paulo',
+    instructorAvatar: 'https://picsum.photos/seed/joao/100/100',
+    instructorCategory: 'Instrutor de Moto',
+    imageUrl: 'https://images.unsplash.com/photo-1610492314470-3d964663e27d?q=80&w=1000&auto=format&fit=crop',
+    caption: 'Segurança em duas rodas começa com o equipamento certo. 🛡️ Hoje falamos sobre a importância do capacete bem ajustado e calçados fechados.',
+    likes: 156,
+    timestamp: '1D'
+  },
+  {
+    id: '6',
+    instructorId: '6',
+    instructorName: 'Lucas H.',
+    instructorAvatar: 'https://picsum.photos/seed/lucas/100/100',
+    instructorCategory: 'Carro Profissional',
+    imageUrl: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=1000&auto=format&fit=crop',
+    caption: 'Baliza: o terror de muitos, mas minha especialidade! 🅿️ Três referências simples e você coloca o carro em qualquer vaga. Vem treinar!',
+    likes: 428,
+    timestamp: '2D'
   }
 ];
 
@@ -50,6 +98,7 @@ const App: React.FC = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
   const [chatThreads, setChatThreads] = useState<ChatThread[]>([]);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const handleLogin = (user: User) => {
     setCurrentUser(user);
@@ -102,12 +151,36 @@ const App: React.FC = () => {
       instructorId: currentUser.id,
       instructorName: currentUser.name,
       instructorAvatar: `https://picsum.photos/seed/${currentUser.id}/100/100`,
+      instructorCategory: 'Instrutor Parceiro',
       imageUrl: `https://picsum.photos/seed/${Date.now()}/600/600`,
       caption,
       likes: 0,
       timestamp: 'AGORA'
     };
     setPosts([newPost, ...posts]);
+  };
+
+  const handleLoadMorePosts = () => {
+    if (isLoadingMore) return;
+    setIsLoadingMore(true);
+    
+    // Simulando tempo de carregamento para efeito de "geração"
+    setTimeout(() => {
+      const morePosts: Post[] = MOCK_INSTRUCTORS.map((inst, index) => ({
+        id: `extra-${Date.now()}-${index}`,
+        instructorId: inst.id,
+        instructorName: inst.name,
+        instructorAvatar: inst.avatar,
+        instructorCategory: inst.specialty,
+        imageUrl: `https://images.unsplash.com/photo-${1500000000000 + (Math.random() * 1000000).toFixed(0)}?auto=format&fit=crop&q=60&w=800`,
+        caption: `Novas turmas abertas para ${inst.specialty.toLowerCase()}! Venha garantir sua aprovação. 🚦✨`,
+        likes: Math.floor(Math.random() * 500),
+        timestamp: `${Math.floor(Math.random() * 10) + 1}D`
+      }));
+      
+      setPosts(prev => [...prev, ...morePosts]);
+      setIsLoadingMore(false);
+    }, 800);
   };
 
   const sendMessage = (participantId: string, name: string, avatar: string, text: string, isFromUser: boolean) => {
@@ -229,7 +302,10 @@ const App: React.FC = () => {
             onBook={(instructorName, avatar) => handleAddBooking(instructorName, avatar, 'Aula Prática')} 
             onViewSchedules={() => setActiveTab(AppTab.SCHEDULES)}
             onSearch={() => setActiveTab(AppTab.MAP)}
+            onViewWallet={() => setActiveTab(AppTab.WALLET)}
             onCreatePost={handleCreatePost}
+            onLoadMore={handleLoadMorePosts}
+            isLoadingMore={isLoadingMore}
           />
         );
       case AppTab.MAP:
@@ -237,6 +313,14 @@ const App: React.FC = () => {
           <MapView 
             onBook={(id, name, avatar) => handleRequestLesson(id, name, avatar)}
             onViewProfile={(id) => handleViewInstructorProfile(id)}
+          />
+        );
+      case AppTab.WALLET:
+        return (
+          <WalletView 
+            userName={currentUser.name}
+            onCreatePost={handleCreatePost}
+            onGoToProfile={() => setActiveTab(AppTab.PROFILE)}
           />
         );
       case AppTab.CHAT_LIST:
@@ -317,14 +401,10 @@ const App: React.FC = () => {
       {showChrome && (
         <header className="px-5 py-4 flex justify-between items-center sticky top-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md z-50 border-b border-gray-50 dark:border-slate-800">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-md shadow-blue-200 dark:shadow-blue-900/20">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5">
-                 <circle cx="12" cy="12" r="10" />
-                 <path d="M12 2a10 10 0 0 1 10 10M12 22a10 10 0 0 1-10-10" opacity="0.5"/>
-                 <path d="M8 12h8M12 8v8" />
-              </svg>
+            <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-white shadow-md">
+              <BrandLogo className="w-5 h-5" />
             </div>
-            <h1 className="text-sm font-black tracking-widest text-blue-600 uppercase">
+            <h1 className="text-sm font-black tracking-[0.25em] text-slate-900 dark:text-white uppercase">
               Prático
             </h1>
           </div>

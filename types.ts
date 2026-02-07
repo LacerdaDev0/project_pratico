@@ -2,6 +2,7 @@
 export enum AppTab {
   FEED = 'feed',
   MAP = 'map',
+  WALLET = 'wallet',
   SCHEDULES = 'schedules',
   PROFILE = 'profile',
   CHAT = 'chat',
@@ -11,11 +12,22 @@ export enum AppTab {
 
 export type UserRole = 'student' | 'instructor' | null;
 
+export interface VehicleInfo {
+  type: 'car' | 'moto' | 'both';
+  model?: string;
+  color?: string;
+  plate?: string;
+  year?: string;
+}
+
 export interface User {
   id: string;
   name: string;
   email: string;
   role: UserRole;
+  vehicle?: VehicleInfo;
+  bio?: string;
+  experience?: string;
 }
 
 export type LicenseType = 'A' | 'B' | 'AB';
@@ -41,6 +53,7 @@ export interface Post {
   instructorId: string;
   instructorName: string;
   instructorAvatar: string;
+  instructorCategory: string;
   imageUrl: string;
   caption: string;
   likes: number;

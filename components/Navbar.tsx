@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { AppTab, UserRole } from '../types';
-import { Home, Map as MapIcon, Calendar, User, MessageSquare } from 'lucide-react';
+import { Home, Map as MapIcon, Calendar, User, MessageSquare, Wallet } from 'lucide-react';
 
 interface NavbarProps {
   activeTab: AppTab;
@@ -14,7 +14,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, userRole }) =>
 
   const tabs = [
     { id: AppTab.FEED, icon: Home, label: 'Início' },
-    ...(!isInstructor ? [{ id: AppTab.MAP, icon: MapIcon, label: 'Mapa' }] : []),
+    ...(!isInstructor ? [{ id: AppTab.MAP, icon: MapIcon, label: 'Mapa' }] : [{ id: AppTab.WALLET, icon: Wallet, label: 'Carteira' }]),
     { id: AppTab.CHAT_LIST, icon: MessageSquare, label: 'Conversas' },
     { id: AppTab.SCHEDULES, icon: Calendar, label: 'Agenda' },
     { id: AppTab.PROFILE, icon: User, label: 'Perfil' },

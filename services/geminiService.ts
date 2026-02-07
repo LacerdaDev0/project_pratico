@@ -1,50 +1,61 @@
 
 import { GoogleGenAI } from "@google/genai";
 
-const getApiKey = () => {
-  try {
-    return process.env.API_KEY || '';
-  } catch (e) {
-    return '';
-  }
-};
-
-// Lista de dicas reserva para quando a cota da API acabar
-const FALLBACK_TIPS = [
-  "Mantenha a calma e observe sempre os retrovisores antes de qualquer manobra.",
+const FALLBACK_TIPS_STUDENT = [
+  "Observe sempre os retrovisores antes de qualquer manobra.",
   "Sinalize todas as suas intenções com antecedência usando as setas.",
-  "Ajuste o banco e os espelhos antes de colocar o cinto de segurança.",
-  "Mantenha uma distância segura do veículo à frente para evitar frenagens bruscas.",
-  "Reduza a velocidade gradualmente ao se aproximar de cruzamentos ou faixas de pedestre.",
-  "Em subidas, use o freio de mão como auxílio para evitar que o carro desça.",
-  "Mantenha as mãos na posição '10 para as 2' no volante para maior controle.",
-  "Respire fundo antes de iniciar o exame prático; a ansiedade é sua maior adversária."
+  "Ajuste o banco e os espelhos antes do cinto de segurança.",
+  "Mantenha distância segura do veículo à frente.",
+  "Reduza a velocidade gradualmente ao se aproximar de faixas.",
+  "Em subidas, use o freio de mão como auxílio inicial.",
+  "Mantenha as mãos na posição '10 para as 2' no volante.",
+  "Respire fundo; a calma é sua maior aliada no exame."
 ];
 
-export const getInstructorAdvice = async (subject: string) => {
+const FALLBACK_TIPS_INSTRUCTOR = [
+  "Mantenha o cockpit organizado; um ambiente limpo transmite profissionalismo.",
+  "Higienize o volante e câmbio entre cada aula prática.",
+  "Se instrutor de moto, verifique se os capacetes reserva estão sempre limpos.",
+  "O perfume do carro deve ser suave para não incomodar alunos sensíveis.",
+  "Documentação do veículo deve estar sempre acessível e organizada.",
+  "Verifique a calibração dos pneus semanalmente para maior segurança.",
+  "Mantenha água fresca disponível para você e ofereça ao aluno.",
+  "Revise as luzes de freio e setas diariamente antes de iniciar as aulas."
+];
+
+export const getInstructorAdvice = async (role: 'student' | 'instructor' = 'student') => {
   try {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    // Always use new GoogleGenAI({apiKey: process.env.API_KEY}); as per guidelines
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    
+    const prompt = role === 'instructor' 
+      ? `Você é um consultor para instrutores de trânsito profissionais. Gere uma "Dica de Ouro" curta (máx 90 caracteres) sobre organização do ambiente de trabalho (carro/moto), manutenção preventiva simples, higiene de equipamentos (capacetes) ou postura profissional. Seja direto e prático. Retorne apenas o texto.`
+      : `Gere uma única "Dica de Ouro" curta (máx 90 caracteres) sobre direção defensiva ou segurança para alunos de autoescola. Retorne apenas o texto.`;
+
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: `Gere uma única "Dica de Ouro" curta (máximo 100 caracteres) sobre ${subject}. A dica deve ser prática, direta e útil para um aluno de autoescola. Retorne apenas o texto da dica, sem aspas.`,
+      contents: prompt,
       config: {
-        maxOutputTokens: 80,
-        temperature: 0.7, 
+        maxOutputTokens: 60,
+        temperature: 0.8, 
       },
     });
     
-    const text = response.text;
-    return text || FALLBACK_TIPS[Math.floor(Math.random() * FALLBACK_TIPS.length)];
+    // Accessing response.text directly as a property
+    const text = response.text?.trim();
+    if (!text) throw new Error("Empty response");
+    
+    return text;
   } catch (error: any) {
-    // Se for erro de quota (429), usamos o fallback silenciosamente para não quebrar a experiência
-    console.warn("Gemini API Quota Exceeded or Error. Using static fallback.");
-    return FALLBACK_TIPS[Math.floor(Math.random() * FALLBACK_TIPS.length)];
+    const fallbacks = role === 'instructor' ? FALLBACK_TIPS_INSTRUCTOR : FALLBACK_TIPS_STUDENT;
+    return fallbacks[Math.floor(Math.random() * fallbacks.length)];
   }
 };
 
 export const generatePostCaption = async (type: string) => {
   try {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    // Always use new GoogleGenAI({apiKey: process.env.API_KEY}); as per guidelines
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: `Crie uma legenda curta e vendedora para Instagram de um instrutor de ${type}.`,
@@ -52,6 +63,7 @@ export const generatePostCaption = async (type: string) => {
         maxOutputTokens: 100,
       }
     });
+    // Accessing response.text directly as a property
     return response.text || "Confira minhas aulas e agende já o seu horário!";
   } catch (error) {
     return "Confira minhas aulas e agende já o seu horário!";

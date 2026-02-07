@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { UserRole, User } from '../types';
-import { ChevronRight, User as UserIcon, Briefcase, Map as MapIcon, Building2, ArrowLeft, AlertCircle, CheckCircle2, Search, Fingerprint, Lock, Car, Bike, History, Layers, Loader2 } from 'lucide-react';
+import { ChevronRight, User as UserIcon, Briefcase, Map as MapIcon, Building2, ArrowLeft, AlertCircle, CheckCircle2, Search, Fingerprint, Lock, Car, Bike, History, Layers, Loader2, UserPlus, CalendarDays, ShieldCheck, MapPin, Calendar, Sparkles } from 'lucide-react';
 
 interface LandingProps {
   onLoginSuccess: (user: User) => void;
@@ -15,7 +15,9 @@ interface RegisteredUser extends User {
 // Initial mock credentials with explicit roles
 const INITIAL_USERS: RegisteredUser[] = [
   { id: 'admin-id', name: 'Administrador Prático', email: 'admin@pratico.com', password: '123456', role: 'student' },
-  { id: 'inst-admin', name: 'Instrutor Master', email: 'instrutor@pratico.com', password: '123456', role: 'instructor' }
+  { id: 'inst-admin', name: 'Instrutor Master', email: 'instrutor@pratico.com', password: '123456', role: 'instructor' },
+  { id: 'test-student', name: 'Teste Aluno', email: 'teste', password: 'teste', role: 'student' },
+  { id: 'test-instructor', name: 'Teste Instrutor', email: 'teste', password: 'teste', role: 'instructor' }
 ];
 
 const MOCK_PARTNER_SCHOOLS = [
@@ -26,15 +28,49 @@ const MOCK_PARTNER_SCHOOLS = [
   "Escola de Motoristas Elite"
 ];
 
-// Custom Steering Wheel SVG for a premium logo feel
-const SteeringWheelIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <circle cx="12" cy="12" r="10" />
-    <circle cx="12" cy="12" r="2" />
-    <path d="M12 2v8" />
-    <path d="M12 14v8" />
-    <path d="M2 12h8" />
-    <path d="M14 12h8" />
+const BR_STATES = [
+  "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"
+];
+
+const MOCK_CITIES: Record<string, string[]> = {
+  "PB": ["João Pessoa", "Campina Grande", "Santa Rita", "Patos", "Bayeux", "Cabedelo", "Guarabira"],
+  "SP": ["São Paulo", "Campinas", "Guarulhos", "São Bernardo do Campo", "Santo André", "Ribeirão Preto", "Santos"],
+  "RJ": ["Rio de Janeiro", "Niterói", "Duque de Caxias", "Belford Roxo", "São Gonçalo", "Nova Iguaçu"],
+  "MG": ["Belo Horizonte", "Uberlândia", "Contagem", "Juiz de Fora", "Betim", "Montes Claros"],
+  "BA": ["Salvador", "Feira de Santana", "Vitória da Conquista", "Camaçari", "Itabuna", "Ilhéus"],
+  "PE": ["Recife", "Jaboatão dos Guararapes", "Olinda", "Caruaru", "Petrolina", "Paulista"],
+  "PR": ["Curitiba", "Londrina", "Maringá", "Ponta Grossa", "Cascavel", "São José dos Pinhais"],
+  "RS": ["Porto Alegre", "Caxias do Sul", "Canoas", "Pelotas", "Santa Maria", "Gravataí"],
+  "SC": ["Florianópolis", "Joinville", "Blumenau", "São José", "Itajaí", "Chapecó"],
+  "CE": ["Fortaleza", "Caucaia", "Juazeiro do Norte", "Maracanaú", "Sobral"],
+  "DF": ["Brasília", "Taguatinga", "Ceilândia", "Águas Claras", "Gama"],
+  "ES": ["Vitória", "Vila Velha", "Serra", "Cariacica", "Guarapari"],
+  "GO": ["Goiânia", "Aparecida de Goiânia", "Anápolis", "Rio Verde", "Luziânia"],
+  "MA": ["São Luís", "Imperatriz", "Timon", "Caxias", "Codó"],
+  "MT": ["Cuiabá", "Várzea Grande", "Rondonópolis", "Sinop", "Tangará da Serra"],
+  "MS": ["Campo Grande", "Dourados", "Três Lagoas", "Corumbá", "Ponta Porã"],
+  "PA": ["Belém", "Ananindeua", "Santarém", "Marabá", "Castanhal"],
+  "PI": ["Teresina", "Parnaíba", "Picos", "Piripiri", "Floriano"],
+  "RN": ["Natal", "Mossoró", "Parnamirim", "São Gonçalo do Amarante", "Macaíba"],
+  "AL": ["Maceió", "Arapiraca", "Rio Largo", "Palmeira dos Índios", "União dos Palmares"],
+  "SE": ["Aracaju", "Nossa Senhora do Socorro", "Lagarto", "Itabaiana", "São Cristóvão"],
+  "AM": ["Manaus", "Parintins", "Itacoatiara", "Manacapuru", "Coari"],
+  "AC": ["Rio Branco", "Cruzeiro do Sul", "Sena Madureira", "Tarauacá", "Feijó"],
+  "AP": ["Macapá", "Santana", "Laranjal do Jari", "Oiapoque", "Porto Grande"],
+  "RO": ["Porto Velho", "Ji-Paraná", "Ariquemes", "Vilhena", "Cacoal"],
+  "RR": ["Boa Vista", "Rorainópolis", "Caracaraí", "Pacaraima", "Mucajaí"],
+  "TO": ["Palmas", "Araguaína", "Gurupi", "Porto Nacional", "Paraíso do Tocantins"]
+};
+
+// Modern Brand Logo Icon
+export const BrandLogo = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2.5" />
+    <path d="M12 2C12 2 12 8 12 10.5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+    <path d="M12 13.5V22" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+    <path d="M12 12L5 16" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+    <path d="M12 12L19 16" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+    <circle cx="12" cy="12" r="1.5" fill="currentColor" />
   </svg>
 );
 
@@ -48,14 +84,20 @@ const GoogleIcon = ({ size = 18 }: { size?: number }) => (
 );
 
 const Landing: React.FC<LandingProps> = ({ onLoginSuccess }) => {
-  const [view, setView] = useState<'main' | 'studentSelection' | 'login' | 'signup' | 'autoescolaLogin' | 'instructorDetails'>('main');
+  const [view, setView] = useState<'main' | 'studentSelection' | 'login' | 'signup' | 'autoescolaLogin' | 'instructorDetails' | 'instructorOnboarding' | 'instructorValidation' | 'instructorLocation'>('main');
   const [users, setUsers] = useState<RegisteredUser[]>(INITIAL_USERS);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [cpf, setCpf] = useState('');
+  const [dob, setDob] = useState('');
+  const [state, setState] = useState('');
+  const [city, setCity] = useState('');
   const [school, setSchool] = useState('');
   
+  // Onboarding Step for instructor
+  const [onboardingStep, setOnboardingStep] = useState(0);
+
   // Google Simulation State
   const [isGoogleSelecting, setIsGoogleSelecting] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
@@ -65,13 +107,48 @@ const Landing: React.FC<LandingProps> = ({ onLoginSuccess }) => {
   const [plate, setPlate] = useState('');
   const [experience, setExperience] = useState('');
 
-  const [errorType, setErrorType] = useState<'empty' | 'invalid' | 'invalid_plate' | 'wrong_role' | null>(null);
+  const [errorType, setErrorType] = useState<'empty' | 'invalid' | 'invalid_plate' | 'wrong_role' | 'underage' | 'invalid_cpf' | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [selectedRole, setSelectedRole] = useState<UserRole>('student');
+
+  const instructorOnboardingSlides = [
+    {
+      title: "Criação de Perfil",
+      description: "Monte seu perfil profissional completo, destaque suas especialidades e seja visto por centenas de alunos na sua região.",
+      icon: <UserPlus size={80} className="text-blue-600" />,
+      buttonText: "Próximo"
+    },
+    {
+      title: "Gerencie sua Agenda",
+      description: "Defina seus horários disponíveis e receba solicitações de aulas diretamente pelo aplicativo de forma organizada.",
+      icon: <CalendarDays size={80} className="text-blue-600" />,
+      buttonText: "Próximo"
+    },
+    {
+      title: "Renda de forma segura",
+      description: "Aumente seu faturamento com total segurança. Receba pagamentos garantidos e gerencie seus ganhos com praticidade.",
+      icon: <ShieldCheck size={80} className="text-blue-600" />,
+      buttonText: "Começar agora"
+    }
+  ];
+
+  const handleInstructorOnboardingNext = () => {
+    if (onboardingStep < instructorOnboardingSlides.length - 1) {
+      setOnboardingStep(onboardingStep + 1);
+    } else {
+      setView('login');
+    }
+  };
 
   const handleStudentClick = () => {
     setSelectedRole('student');
     setView('studentSelection');
+  };
+
+  const handleInstructorClick = () => {
+    setSelectedRole('instructor');
+    setOnboardingStep(0);
+    setView('instructorOnboarding');
   };
 
   const handleBackToStart = () => {
@@ -108,14 +185,14 @@ const Landing: React.FC<LandingProps> = ({ onLoginSuccess }) => {
       return;
     }
 
-    const userFound = users.find(u => u.email.trim().toLowerCase() === email.trim().toLowerCase() && u.password === password);
+    // Procura o usuário que corresponde às credenciais E ao papel selecionado
+    const userFound = users.find(u => 
+      u.email.trim().toLowerCase() === email.trim().toLowerCase() && 
+      u.password === password &&
+      u.role === selectedRole
+    );
 
     if (userFound) {
-      if (userFound.role !== selectedRole) {
-        setErrorType('wrong_role');
-        return;
-      }
-
       onLoginSuccess({
         id: userFound.id,
         name: userFound.name,
@@ -123,7 +200,17 @@ const Landing: React.FC<LandingProps> = ({ onLoginSuccess }) => {
         role: userFound.role
       });
     } else {
-      setErrorType('invalid');
+      // Verifica se o e-mail existe em outro papel para dar feedback específico
+      const existsInOtherRole = users.find(u => 
+        u.email.trim().toLowerCase() === email.trim().toLowerCase() && 
+        u.password === password
+      );
+      
+      if (existsInOtherRole) {
+        setErrorType('wrong_role');
+      } else {
+        setErrorType('invalid');
+      }
     }
   };
 
@@ -133,12 +220,11 @@ const Landing: React.FC<LandingProps> = ({ onLoginSuccess }) => {
       return;
     }
 
-    // Apenas permite entrar se CPF for '10' e Senha for '10'
-    if (cpf.trim() === '10' && password.trim() === '10') {
+    if ((cpf.trim() === '10' && password.trim() === '10') || (cpf.trim() === 'teste' && password.trim() === 'teste')) {
       onLoginSuccess({
         id: `acc-${Date.now()}`,
-        name: 'Aluno Credenciado (10)',
-        email: '10@autoescola.br',
+        name: 'Usuário Teste (Credenciado)',
+        email: 'teste@autoescola.br',
         role: 'student'
       });
     } else {
@@ -153,7 +239,7 @@ const Landing: React.FC<LandingProps> = ({ onLoginSuccess }) => {
     }
     
     if (selectedRole === 'instructor') {
-      setView('instructorDetails');
+      setView('instructorValidation');
       setErrorType(null);
       return;
     }
@@ -176,6 +262,47 @@ const Landing: React.FC<LandingProps> = ({ onLoginSuccess }) => {
     setTimeout(() => setShowSuccess(false), 5000);
   };
 
+  const handleInstructorValidationNext = () => {
+    const cpfClean = cpf.replace(/\D/g, '');
+    if (cpfClean.length !== 11 && cpfClean !== 'teste') {
+      setErrorType('invalid_cpf');
+      return;
+    }
+
+    if (!dob && cpfClean !== 'teste') {
+      setErrorType('empty');
+      return;
+    }
+
+    if (cpfClean !== 'teste') {
+      const birthDate = new Date(dob);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      // Use getMonth() instead of non-existent property month to fix line 281
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+
+      if (age < 18) {
+        setErrorType('underage');
+        return;
+      }
+    }
+
+    setErrorType(null);
+    setView('instructorLocation');
+  };
+
+  const handleInstructorLocationNext = () => {
+    if (!state || !city) {
+      setErrorType('empty');
+      return;
+    }
+    setErrorType(null);
+    setView('instructorDetails');
+  };
+
   const handleInstructorDetailsFinish = () => {
     const plateRegex = /^[A-Z]{3}-?[0-9][A-Z0-9][0-9]{2}$/i;
     
@@ -184,7 +311,7 @@ const Landing: React.FC<LandingProps> = ({ onLoginSuccess }) => {
       return;
     }
 
-    if (!plateRegex.test(plate.trim().replace(' ', ''))) {
+    if (plate !== 'teste' && !plateRegex.test(plate.trim().replace(' ', ''))) {
       setErrorType('invalid_plate');
       return;
     }
@@ -216,14 +343,13 @@ const Landing: React.FC<LandingProps> = ({ onLoginSuccess }) => {
     setIsGoogleSelecting(false);
     setIsGoogleLoading(true);
     
-    // Artificial delay to simulate "vincular e entrar"
     setTimeout(() => {
       setIsGoogleLoading(false);
       onLoginSuccess({
         id: `google-${Date.now()}`,
         name: userName,
         email: userEmail,
-        role: selectedRole // Uses the role selected previously in the UI
+        role: selectedRole
       });
     }, 1200);
   };
@@ -288,6 +414,199 @@ const Landing: React.FC<LandingProps> = ({ onLoginSuccess }) => {
           <div className="bg-gray-50 p-6 text-[10px] text-gray-400 leading-relaxed text-center font-medium">
             Para continuar, o Google compartilhará seu nome, endereço de e-mail e foto do perfil com o app Prático.
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (view === 'instructorOnboarding') {
+    const currentSlide = instructorOnboardingSlides[onboardingStep];
+    return (
+      <div className="flex flex-col h-full bg-white animate-in fade-in duration-500 relative">
+        <div className="absolute top-6 right-6">
+          <button 
+            onClick={() => setView('login')}
+            className="text-gray-400 text-sm font-medium hover:text-blue-600 transition-colors"
+          >
+            Pular
+          </button>
+        </div>
+
+        <div className="flex-1 flex flex-col items-center justify-center px-10 text-center">
+          <div className="mb-16 relative">
+            <div className="absolute inset-0 bg-blue-50 rounded-full scale-150 blur-3xl opacity-50"></div>
+            <div className="relative z-10 animate-in zoom-in duration-700">
+              {currentSlide.icon}
+            </div>
+          </div>
+
+          <div className="space-y-4 animate-in slide-in-from-bottom-4 duration-700">
+            <h2 className="text-2xl font-black text-gray-900 leading-tight">
+              {currentSlide.title}
+            </h2>
+            <p className="text-gray-500 text-sm leading-relaxed">
+              {currentSlide.description}
+            </p>
+          </div>
+
+          <div className="flex gap-2 mt-12 mb-10">
+            {instructorOnboardingSlides.map((_, idx) => (
+              <div 
+                key={idx}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  onboardingStep === idx ? 'w-8 bg-blue-600' : 'w-2 bg-gray-200'
+                }`}
+              />
+            ))}
+          </div>
+
+          <button 
+            onClick={handleInstructorOnboardingNext}
+            className="text-blue-600 font-black text-lg hover:underline transition-all active:scale-95"
+          >
+            {currentSlide.buttonText}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (view === 'instructorValidation') {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-white px-8 text-center animate-in fade-in duration-500">
+        <div className="w-full max-w-xs flex flex-col items-center">
+          <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mb-6 shadow-sm border border-blue-100">
+            <Fingerprint size={32} />
+          </div>
+          <h2 className="text-3xl font-black text-[#1a237e] uppercase tracking-tight mb-1">
+            VALIDAÇÃO DE DADOS
+          </h2>
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.25em] mb-10">
+            SÓ MAIS ALGUNS DETALHES
+          </p>
+
+          <div className="w-full flex flex-col gap-4 mb-8">
+            <div className="relative">
+              <input 
+                type="text" 
+                placeholder="CPF (apenas números)" 
+                value={cpf}
+                onChange={(e) => { setCpf(e.target.value); setErrorType(null); }}
+                className={`w-full bg-gray-50 border-2 ${errorType === 'invalid_cpf' || (errorType === 'empty' && !cpf) ? 'border-red-200' : 'border-transparent'} rounded-3xl px-6 py-4 text-sm font-semibold focus:ring-2 focus:ring-blue-100 transition-all outline-none text-gray-700`}
+                maxLength={11}
+              />
+              <Fingerprint className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-200" size={18} />
+            </div>
+
+            <div className="relative">
+              <input 
+                type="date" 
+                value={dob}
+                onChange={(e) => { setDob(e.target.value); setErrorType(null); }}
+                className={`w-full bg-gray-50 border-2 ${errorType === 'underage' || (errorType === 'empty' && !dob) ? 'border-red-200' : 'border-transparent'} rounded-3xl px-6 py-4 text-sm font-semibold focus:ring-2 focus:ring-blue-100 transition-all outline-none text-gray-700`}
+              />
+              <Calendar className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-200" size={18} />
+            </div>
+
+            {errorType === 'empty' && (
+              <p className="text-[10px] font-bold text-red-500 uppercase tracking-wider">
+                Preencha todos os campos obrigatórios
+              </p>
+            )}
+            {errorType === 'invalid_cpf' && (
+              <p className="text-[10px] font-bold text-red-500 uppercase tracking-wider">
+                Informe um CPF válido (11 dígitos)
+              </p>
+            )}
+            {errorType === 'underage' && (
+              <p className="text-[10px] font-bold text-red-500 uppercase tracking-wider">
+                Você deve ser maior de 18 anos para ensinar
+              </p>
+            )}
+          </div>
+
+          <button 
+            onClick={handleInstructorValidationNext}
+            className="w-full bg-gradient-to-r from-blue-600 to-blue-500 text-white py-5 rounded-[2.5rem] font-bold text-sm tracking-widest shadow-2xl shadow-blue-400/30 hover:from-blue-700 hover:to-blue-600 active:scale-[0.98] transition-all uppercase mb-10"
+          >
+            PRÓXIMA ETAPA
+          </button>
+
+          <button 
+            onClick={() => setView('signup')}
+            className="flex items-center gap-2 text-gray-400 font-bold text-xs hover:text-blue-500 transition-colors uppercase tracking-widest"
+          >
+            <ArrowLeft size={16} strokeWidth={2.5} />
+            Voltar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (view === 'instructorLocation') {
+    const citiesForState = state ? MOCK_CITIES[state] || ["Capital"] : [];
+
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-white px-8 text-center animate-in fade-in duration-500">
+        <div className="w-full max-w-xs flex flex-col items-center">
+          <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mb-6 shadow-sm border border-blue-100">
+            <MapPin size={32} />
+          </div>
+          <h2 className="text-3xl font-black text-[#1a237e] uppercase tracking-tight mb-1">
+            SUA LOCALIZAÇÃO
+          </h2>
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.25em] mb-10">
+            ONDE VOCÊ ATUA?
+          </p>
+
+          <div className="w-full flex flex-col gap-4 mb-8">
+            <div className="relative">
+              <select 
+                value={state}
+                onChange={(e) => { setState(e.target.value); setCity(''); setErrorType(null); }}
+                className={`w-full bg-gray-50 border-2 ${errorType === 'empty' && !state ? 'border-red-200' : 'border-transparent'} rounded-3xl px-6 py-4 text-sm font-semibold focus:ring-2 focus:ring-blue-100 transition-all outline-none text-gray-700 appearance-none`}
+              >
+                <option value="">Selecione seu Estado</option>
+                {BR_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+              <ChevronRight className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-300 rotate-90 pointer-events-none" size={16} />
+            </div>
+
+            <div className="relative">
+              <select 
+                value={city}
+                onChange={(e) => { setCity(e.target.value); setErrorType(null); }}
+                disabled={!state}
+                className={`w-full bg-gray-50 border-2 ${errorType === 'empty' && !city ? 'border-red-200' : 'border-transparent'} rounded-3xl px-6 py-4 text-sm font-semibold focus:ring-2 focus:ring-blue-100 transition-all outline-none text-gray-700 appearance-none disabled:opacity-50`}
+              >
+                <option value="">Selecione sua Cidade</option>
+                {citiesForState.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+              <ChevronRight className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-300 rotate-90 pointer-events-none" size={16} />
+            </div>
+
+            {errorType === 'empty' && (
+              <p className="text-[10px] font-bold text-red-500 uppercase tracking-wider">
+                Selecione seu estado e cidade
+              </p>
+            )}
+          </div>
+
+          <button 
+            onClick={handleInstructorLocationNext}
+            className="w-full bg-gradient-to-r from-blue-600 to-blue-500 text-white py-5 rounded-[2.5rem] font-bold text-sm tracking-widest shadow-2xl shadow-blue-400/30 hover:from-blue-700 hover:to-blue-600 active:scale-[0.98] transition-all uppercase mb-10"
+          >
+            PRÓXIMA ETAPA
+          </button>
+
+          <button 
+            onClick={() => setView('instructorValidation')}
+            className="flex items-center gap-2 text-gray-400 font-bold text-xs hover:text-blue-500 transition-colors uppercase tracking-widest"
+          >
+            <ArrowLeft size={16} strokeWidth={2.5} />
+            Voltar
+          </button>
         </div>
       </div>
     );
@@ -375,7 +694,7 @@ const Landing: React.FC<LandingProps> = ({ onLoginSuccess }) => {
           </button>
 
           <button 
-            onClick={() => setView('signup')}
+            onClick={() => setView('instructorLocation')}
             className="flex items-center gap-2 text-gray-400 font-bold text-xs hover:text-blue-500 transition-colors uppercase tracking-widest"
           >
             <ArrowLeft size={16} strokeWidth={2.5} />
@@ -548,8 +867,8 @@ const Landing: React.FC<LandingProps> = ({ onLoginSuccess }) => {
               </div>
             )}
             <input 
-              type="email" 
-              placeholder="E-mail" 
+              type="text" 
+              placeholder="E-mail ou Usuário" 
               value={email}
               onChange={(e) => { setEmail(e.target.value); setErrorType(null); }}
               className={`w-full bg-gray-50 border-2 ${errorType ? 'border-red-200' : 'border-transparent'} rounded-3xl px-6 py-4 text-sm font-medium focus:ring-2 focus:ring-blue-100 transition-all outline-none text-gray-700`}
@@ -581,7 +900,6 @@ const Landing: React.FC<LandingProps> = ({ onLoginSuccess }) => {
             <span className="relative z-10">ENTRAR NO APLICATIVO</span>
           </button>
 
-          {/* Somente alunos podem entrar com Google */}
           {selectedRole === 'student' && (
             <>
               <div className="w-full flex items-center gap-4 mb-8">
@@ -634,7 +952,7 @@ const Landing: React.FC<LandingProps> = ({ onLoginSuccess }) => {
           <div className="w-full flex flex-col gap-5">
             <button 
               onClick={goToLogin}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-500 p-6 rounded-[2.5rem] flex items-center justify-between shadow-2xl shadow-blue-100 group active:scale-[0.98] transition-all relative overflow-hidden text-left"
+              className="w-full bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 p-6 rounded-[2.5rem] flex items-center justify-between shadow-2xl shadow-blue-100 group active:scale-[0.98] transition-all relative overflow-hidden text-left"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
               
@@ -691,26 +1009,38 @@ const Landing: React.FC<LandingProps> = ({ onLoginSuccess }) => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-white px-8 text-center animate-in fade-in duration-1000">
       <div className="mb-16 flex flex-col items-center">
-        <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-blue-700 rounded-[2.5rem] flex items-center justify-center text-white shadow-2xl shadow-blue-200 mb-6 transform hover:rotate-12 transition-transform duration-500">
-          <SteeringWheelIcon className="w-14 h-14" />
+        <div className="relative mb-8 group">
+          <div className="absolute inset-0 bg-blue-400 rounded-[2.5rem] blur-[40px] opacity-20 group-hover:opacity-40 transition-opacity"></div>
+          <div className="w-24 h-24 bg-gradient-to-tr from-blue-700 via-blue-600 to-indigo-600 rounded-[2.5rem] flex items-center justify-center text-white shadow-2xl shadow-blue-200 relative z-10 group-hover:-translate-y-1 transition-transform duration-500">
+             <div className="absolute inset-0 rounded-[2.5rem] bg-white/10 backdrop-blur-[1px] opacity-50"></div>
+             <BrandLogo className="w-14 h-14 relative z-20 drop-shadow-[0_4px_10px_rgba(0,0,0,0.3)]" />
+             <div className="absolute -top-2 -right-2 bg-white p-1.5 rounded-xl shadow-lg animate-bounce duration-[2000ms]">
+                <Sparkles size={12} className="text-blue-600" />
+             </div>
+          </div>
         </div>
-        <h1 className="text-3xl font-black tracking-[0.3em] text-blue-600 uppercase">
-          PRÁTICO
-        </h1>
-        <p className="mt-3 text-[10px] font-bold text-gray-400 uppercase tracking-[0.15em]">
-          Conectando você à sua liberdade no volante
+        
+        <div className="relative">
+          <h1 className="text-4xl font-black tracking-[0.35em] text-slate-900 uppercase">
+            PRÁTICO
+          </h1>
+          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-12 h-1 bg-blue-600 rounded-full"></div>
+        </div>
+        
+        <p className="mt-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.25em] leading-relaxed max-w-[240px]">
+          Conectando você à sua <span className="text-blue-600">liberdade</span> no volante
         </p>
       </div>
 
       <div className="w-full max-w-xs flex flex-col gap-5">
         <button 
           onClick={handleStudentClick}
-          className="w-full bg-gradient-to-r from-blue-600 to-blue-500 p-6 rounded-[2.5rem] flex items-center justify-between shadow-2xl shadow-blue-100 group active:scale-[0.98] transition-all relative overflow-hidden"
+          className="w-full bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 p-6 rounded-[2.5rem] flex items-center justify-between shadow-2xl shadow-blue-100 group active:scale-[0.98] transition-all relative overflow-hidden"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
           
           <div className="flex items-center gap-5 relative z-10">
-            <div className="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-white shadow-inner">
+            <div className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-white shadow-inner">
               <UserIcon size={30} strokeWidth={2.5} />
             </div>
             <div className="text-left">
@@ -722,19 +1052,19 @@ const Landing: React.FC<LandingProps> = ({ onLoginSuccess }) => {
         </button>
 
         <button 
-          onClick={() => { setSelectedRole('instructor'); setView('login'); }}
-          className="w-full bg-white p-6 rounded-[2.5rem] flex items-center justify-between border-2 border-gray-50 shadow-xl shadow-gray-100/30 group active:scale-[0.98] transition-all"
+          onClick={handleInstructorClick}
+          className="w-full bg-white p-6 rounded-[2.5rem] flex items-center justify-between border border-slate-100 shadow-xl shadow-slate-50 group active:scale-[0.98] transition-all"
         >
           <div className="flex items-center gap-5">
             <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 shadow-sm">
               <Briefcase size={28} strokeWidth={2.5} />
             </div>
             <div className="text-left">
-              <span className="block text-gray-800 font-bold text-xl tracking-tight leading-tight">Sou Instrutor</span>
-              <span className="block text-gray-400 text-[10px] font-bold uppercase tracking-wider mt-0.5">Quero ensinar</span>
+              <span className="block text-slate-900 font-bold text-xl tracking-tight leading-tight">Sou Instrutor</span>
+              <span className="block text-slate-400 text-[10px] font-bold uppercase tracking-wider mt-0.5">Quero ensinar</span>
             </div>
           </div>
-          <ChevronRight className="text-gray-300 group-hover:translate-x-1 transition-transform" />
+          <ChevronRight className="text-slate-300 group-hover:translate-x-1 transition-transform" />
         </button>
       </div>
 
