@@ -234,10 +234,7 @@ const App: React.FC = () => {
     return targetThreadId;
   };
 
-  const handleRequestLesson = (instructorId: string, name: string, avatar: string) => {
-    setChatDraft(null);
-    setShowQuickActions(true);
-    
+  const handleRequestLesson = (instructorId: string, name: string, avatar: string, bookingDetails?: any) => {
     const existing = chatThreads.find(t => t.participantId === instructorId);
     let threadId = existing?.id;
     
@@ -253,6 +250,29 @@ const App: React.FC = () => {
         messages: []
       };
       setChatThreads(prev => [newThread, ...prev]);
+    }
+
+    // Se houver detalhes do agendamento, envia a mensagem automática E adiciona à agenda
+    if (bookingDetails) {
+      // 1. Adiciona à lista de agendamentos (Agenda)
+      const newBooking: Booking = {
+        id: `b-${Date.now()}`,
+        instructorId,
+        instructorName: name,
+        instructorAvatar: avatar,
+        date: bookingDetails.date,
+        time: bookingDetails.time,
+        status: 'confirmed',
+        subject: `Aula Prática - Categoria ${bookingDetails.category}`
+      };
+      setBookings(prev => [newBooking, ...prev]);
+
+      // 2. Envia mensagem no chat
+      const bookingMsg = `✅ NOVO AGENDAMENTO REALIZADO!\n\n📅 Data: ${bookingDetails.date}\n🕒 Horário: ${bookingDetails.time}\n🚗 Categoria: ${bookingDetails.category}\n⏱️ Duração: ${bookingDetails.duration}min\n\nOlá! Acabei de agendar esta aula pelo aplicativo. Aguardo confirmação!`;
+      sendMessage(instructorId, name, avatar, bookingMsg, true);
+      setShowQuickActions(false);
+    } else {
+      setShowQuickActions(true);
     }
     
     setSelectedChatId(threadId || null);
@@ -309,8 +329,6 @@ const App: React.FC = () => {
             onSearch={() => setActiveTab(AppTab.MAP)}
             onViewWallet={() => setActiveTab(AppTab.WALLET)}
             onCreatePost={handleCreatePost}
-            onLoadMore={handleLoadMorePosts}
-            isLoadingMore={isLoadingMore}
             onViewPractical={() => {
               setClassesMode('practical');
               setActiveTab(AppTab.MAP);
@@ -333,7 +351,7 @@ const App: React.FC = () => {
         }
         return (
           <MapView 
-            onBook={(id, name, avatar) => handleRequestLesson(id, name, avatar)}
+            onBook={(id, name, avatar, details) => handleRequestLesson(id, name, avatar, details)}
             onViewProfile={(id) => handleViewInstructorProfile(id)}
           />
         );
@@ -404,7 +422,7 @@ const App: React.FC = () => {
             instructor={instructor}
             onBack={() => setActiveTab(AppTab.MAP)}
             onStartChat={() => openChat(instructor.id, instructor.name, instructor.avatar)}
-            onBook={() => openChat(instructor.id, instructor.name, instructor.avatar)}
+            onBook={(id, name, avatar, details) => handleRequestLesson(id, name, avatar, details)}
           />
         ) : null;
       default:
