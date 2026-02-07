@@ -62,15 +62,19 @@ const MOCK_CITIES: Record<string, string[]> = {
   "TO": ["Palmas", "Araguaína", "Gurupi", "Porto Nacional", "Paraíso do Tocantins"]
 };
 
-// Modern Brand Logo Icon
+// Modern Brand Logo Icon - Refined to be a Steering Wheel (Volante)
 export const BrandLogo = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2.5" />
-    <path d="M12 2C12 2 12 8 12 10.5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-    <path d="M12 13.5V22" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-    <path d="M12 12L5 16" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-    <path d="M12 12L19 16" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-    <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+    {/* Steering Wheel Outer Rim */}
+    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.2" />
+    {/* Inner decorative detail */}
+    <circle cx="12" cy="12" r="7.5" stroke="currentColor" strokeWidth="0.8" opacity="0.4" strokeDasharray="1 2" />
+    {/* Center Hub (Buzina/Logo central) */}
+    <circle cx="12" cy="12" r="2.8" fill="currentColor" />
+    {/* Three Spokes (Raios do volante) */}
+    <path d="M12 9.2V3.5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+    <path d="M14.5 13.8L18.5 17.5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+    <path d="M9.5 13.8L5.5 17.5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
   </svg>
 );
 
@@ -720,7 +724,7 @@ const Landing: React.FC<LandingProps> = ({ onLoginSuccess }) => {
             ACESSO CREDENCIADO
           </h2>
           <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.25em] mb-10">
-            CONECTE-SE COM SUA AUTOESCOLA
+            CONECTE-SE WITH SUA AUTOESCOLA
           </p>
 
           <div className="w-full flex flex-col gap-4 mb-8">
@@ -1027,12 +1031,12 @@ const Landing: React.FC<LandingProps> = ({ onLoginSuccess }) => {
     <div className="flex flex-col items-center justify-center min-h-screen bg-white px-8 text-center animate-in fade-in duration-1000">
       <div className="mb-16 flex flex-col items-center">
         <div className="relative mb-8 group">
-          <div className="absolute inset-0 bg-blue-400 rounded-[2.5rem] blur-[40px] opacity-20 group-hover:opacity-40 transition-opacity"></div>
-          <div className="w-24 h-24 bg-gradient-to-tr from-blue-700 via-blue-600 to-indigo-600 rounded-[2.5rem] flex items-center justify-center text-white shadow-2xl shadow-blue-200 relative z-10 group-hover:-translate-y-1 transition-transform duration-500">
-             <div className="absolute inset-0 rounded-[2.5rem] bg-white/10 backdrop-blur-[1px] opacity-50"></div>
-             <BrandLogo className="w-14 h-14 relative z-20 drop-shadow-[0_4px_10px_rgba(0,0,0,0.3)]" />
-             <div className="absolute -top-2 -right-2 bg-white p-1.5 rounded-xl shadow-lg animate-bounce duration-[2000ms]">
-                <Sparkles size={12} className="text-blue-600" />
+          <div className="absolute inset-0 bg-blue-500 rounded-[2.5rem] blur-[45px] opacity-25 group-hover:opacity-45 transition-opacity duration-700"></div>
+          <div className="w-24 h-24 bg-gradient-to-tr from-blue-700 via-blue-600 to-indigo-600 rounded-[2.5rem] flex items-center justify-center text-white shadow-2xl shadow-blue-300/40 relative z-10 group-hover:-translate-y-2 transition-transform duration-500 ease-out border-b-4 border-black/10">
+             <div className="absolute inset-0 rounded-[2.5rem] bg-white/5 backdrop-blur-[0.5px] opacity-40"></div>
+             <BrandLogo className="w-14 h-14 relative z-20 drop-shadow-[0_6px_12px_rgba(0,0,0,0.35)]" />
+             <div className="absolute -top-3 -right-3 bg-white p-1.5 rounded-xl shadow-xl animate-bounce duration-[2500ms]">
+                <Sparkles size={14} className="text-blue-600" />
              </div>
           </div>
         </div>
