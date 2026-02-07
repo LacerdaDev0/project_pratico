@@ -1,0 +1,7 @@
+{
+  "name": "Copy of Prático - Instrutores e Alunos",
+  "description": "Uma plataforma inovadora que une o estilo de descoberta do Instagram com a conveniência de localização do Uber para conectar instrutores autônomos e alunos.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
