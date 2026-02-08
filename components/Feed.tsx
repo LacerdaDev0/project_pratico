@@ -45,7 +45,7 @@ const Feed: React.FC<FeedProps> = ({ user, userName, userRole, posts, onBook, on
   const isInstructor = userRole === 'instructor';
   const isCredentialed = user?.isCredentialed;
 
-  const fetchNewTip = async () => {
+  /* const fetchNewTip = async () => {
     if (isUpdating) return;
     setIsUpdating(true);
     const tip = await getInstructorAdvice(isInstructor ? 'instructor' : 'student');
@@ -54,6 +54,7 @@ const Feed: React.FC<FeedProps> = ({ user, userName, userRole, posts, onBook, on
     }
     setIsUpdating(false);
   };
+  */
 
   useEffect(() => {
     fetchNewTip();
