@@ -246,7 +246,7 @@ const Feed: React.FC<FeedProps> = ({ user, userName, userRole, posts, onBook, on
           <div key={inst.id} className="flex flex-col items-center gap-1.5 flex-shrink-0 cursor-pointer group">
             <div className="w-[72px] h-[72px] rounded-full p-[2.5px] bg-gradient-to-tr from-blue-600 via-indigo-500 to-purple-600 transition-all group-active:scale-90 shadow-lg shadow-blue-100 dark:shadow-none">
               <div className="w-full h-full rounded-full border-2 border-white dark:border-slate-950 overflow-hidden bg-gray-100">
-                <img src={inst.avatar} alt={inst.name} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                <img src={inst.avatarUrl} alt={inst.name} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
               </div>
             </div>
             <span className="text-[10px] font-black text-gray-500 dark:text-gray-400 truncate w-16 text-center tracking-tighter uppercase mt-0.5">
