@@ -29,12 +29,13 @@ const Feed: React.FC<FeedProps> = ({ user, userName, userRole, posts, onBook, on
 
   // Este comando roda assim que a página abre e busca os dados no Firebase
   React.useEffect(() => {
-    // Agora usamos o streamInstructors que fica vigiando o banco
+    console.log("Iniciando escuta do Firebase..."); // Aviso 1
+
     const unsubscribe = streamInstructors((data) => {
+      console.log("Dados recebidos do Firebase:", data); // Aviso 2 - Aqui veremos o Rodrigo real
       setDbInstructors(data);
     });
 
-    
     return () => unsubscribe();
   }, []);
   const [aiTip, setAiTip] = useState<string>("");
