@@ -56,13 +56,14 @@ const Feed: React.FC<FeedProps> = ({ user, userName, userRole, posts, onBook, on
   };
   */
 
-  useEffect(() => {
+  /* useEffect(() => {
     fetchNewTip();
     const interval = setInterval(() => {
       fetchNewTip();
     }, 120000);
     return () => clearInterval(interval);
-  }, [userRole]);
+  }, [userRole]); 
+*/
 
   useEffect(() => {
     const observer = new IntersectionObserver(
