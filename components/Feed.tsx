@@ -29,11 +29,13 @@ const Feed: React.FC<FeedProps> = ({ user, userName, userRole, posts, onBook, on
 
   // Este comando roda assim que a página abre e busca os dados no Firebase
   React.useEffect(() => {
-    const fetchFromFirebase = async () => {
-      const data = await getInstructors();
+    // Agora usamos o streamInstructors que fica vigiando o banco
+    const unsubscribe = streamInstructors((data) => {
       setDbInstructors(data);
-    };
-    fetchFromFirebase();
+    });
+
+    
+    return () => unsubscribe();
   }, []);
   const [aiTip, setAiTip] = useState<string>("");
   const [isUpdating, setIsUpdating] = useState(false);
