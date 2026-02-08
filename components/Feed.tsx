@@ -1,4 +1,4 @@
-import { getInstructors, Instructor } from '../services/instructorService';
+import { streamInstructors, Instructor } from '../services/instructorService';
 import React, { useState, useEffect, useRef } from 'react';
 import { Post, UserRole, User, MOCK_INSTRUCTORS } from '../types';
 // Fixed: Added CheckCircle2 and ClipboardCheck to the imports from lucide-react
