@@ -1,13 +1,33 @@
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "./firebaseConfig";
+// services/instructorService.ts
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from './firebaseConfig'; // Importa a instância do Firestore do seu arquivo de configuração
 
-// Esta função vai buscar os dados reais no Firebase
-export const getInstructorsFromFirebase = async () => {
-  const instructorsCol = collection(db, 'instructors'); // Nome da coleção no Firestore
-  const instructorSnapshot = await getDocs(instructorsCol);
-  const instructorList = instructorSnapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  }));
-  return instructorList;
-};
+interface Instructor {
+  id: string;
+  name: string;
+  rating: number;
+  distance: number;
+  price: number;
+  avatarUrl: string;
+}
+
+export async function getInstructors(): Promise<Instructor[]> {
+  const instructorsCollectionRef = collection(db, 'instructors');
+  const querySnapshot = await getDocs(instructorsCollectionRef);
+
+  const instructors: Instructor[] = [];
+  querySnapshot.forEach((doc) => {
+    // Certifique-se de que os campos existam nos seus documentos do Firestore
+    const data = doc.data();
+    instructors.push({
+      id: doc.id,
+      name: data.name,
+      rating: data.rating,
+      distance: data.distance,
+      price: data.price,
+      avatarUrl: data.avatarUrl,
+    });
+  });
+
+  return instructors;
+}
