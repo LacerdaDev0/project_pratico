@@ -1,4 +1,4 @@
-import { streamInstructors, Instructor } from '../services/instructorService';
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Post, UserRole, User, MOCK_INSTRUCTORS } from '../types';
 // Fixed: Added CheckCircle2 and ClipboardCheck to the imports from lucide-react
@@ -24,20 +24,6 @@ interface FeedProps {
 }
 
 const Feed: React.FC<FeedProps> = ({ user, userName, userRole, posts, onBook, onViewSchedules, onSearch, onViewWallet, onCreatePost, onLoadMore, isLoadingMore, onViewPractical, onViewTheoretical, onViewStudies, onViewSimulado }) => {
-  // Esta parte cria uma "memória" para guardar os instrutores do banco
-  const [dbInstructors, setDbInstructors] = React.useState<Instructor[]>([]);
-
-  // Este comando roda assim que a página abre e busca os dados no Firebase
-  React.useEffect(() => {
-    console.log("Iniciando escuta do Firebase..."); // Aviso 1
-
-    const unsubscribe = streamInstructors((data) => {
-      console.log("Dados recebidos do Firebase:", data); // Aviso 2 - Aqui veremos o Rodrigo real
-      setDbInstructors(data);
-    });
-
-    return () => unsubscribe();
-  }, []);
   const [aiTip, setAiTip] = useState<string>("");
   const [isUpdating, setIsUpdating] = useState(false);
   const observerRef = useRef<HTMLDivElement | null>(null);
@@ -45,7 +31,7 @@ const Feed: React.FC<FeedProps> = ({ user, userName, userRole, posts, onBook, on
   const isInstructor = userRole === 'instructor';
   const isCredentialed = user?.isCredentialed;
 
-  /* const fetchNewTip = async () => {
+  const fetchNewTip = async () => {
     if (isUpdating) return;
     setIsUpdating(true);
     const tip = await getInstructorAdvice(isInstructor ? 'instructor' : 'student');
@@ -54,16 +40,14 @@ const Feed: React.FC<FeedProps> = ({ user, userName, userRole, posts, onBook, on
     }
     setIsUpdating(false);
   };
-  */
 
-  /* useEffect(() => {
+  useEffect(() => {
     fetchNewTip();
     const interval = setInterval(() => {
       fetchNewTip();
     }, 120000);
     return () => clearInterval(interval);
-  }, [userRole]); 
-*/
+  }, [userRole]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -82,7 +66,7 @@ const Feed: React.FC<FeedProps> = ({ user, userName, userRole, posts, onBook, on
     return () => observer.disconnect();
   }, [isLoadingMore, onLoadMore, isCredentialed]);
 
-  const followedInstructors = dbInstructors.length > 0 ? dbInstructors : MOCK_INSTRUCTORS.slice(0, 4);
+  const followedInstructors = MOCK_INSTRUCTORS.slice(0, 4);
 
   // View para Aluno Credenciado
   if (isCredentialed) {
@@ -246,7 +230,7 @@ const Feed: React.FC<FeedProps> = ({ user, userName, userRole, posts, onBook, on
           <div key={inst.id} className="flex flex-col items-center gap-1.5 flex-shrink-0 cursor-pointer group">
             <div className="w-[72px] h-[72px] rounded-full p-[2.5px] bg-gradient-to-tr from-blue-600 via-indigo-500 to-purple-600 transition-all group-active:scale-90 shadow-lg shadow-blue-100 dark:shadow-none">
               <div className="w-full h-full rounded-full border-2 border-white dark:border-slate-950 overflow-hidden bg-gray-100">
-                <img src={inst.avatarUrl} alt={inst.name} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                <img src={inst.avatar} alt={inst.name} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
               </div>
             </div>
             <span className="text-[10px] font-black text-gray-500 dark:text-gray-400 truncate w-16 text-center tracking-tighter uppercase mt-0.5">
