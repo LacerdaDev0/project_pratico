@@ -45,20 +45,31 @@ O aplicativo tem como objetivo conectar **alunos** a **instrutores autônomos de
 
 ---
 
-## 🤖 Uso de Inteligência Artificial
+🤖 Uso de Inteligência Artificial
 
-A Inteligência Artificial foi utilizada como uma **ferramenta de apoio**, não como substituição do aprendizado.
+Este projeto foi inteiramente desenvolvido com auxílio de Inteligência Artificial.
 
-Ela auxiliou em:
+O papel humano no processo foi focado principalmente em:
 
-* Geração de ideias e soluções
-* Estruturação e organização do código
-* Sugestões de melhorias técnicas
-* Definição de fluxos de telas
-* Criação de textos, descrições e documentação
+Definir a ideia do aplicativo
 
-Este projeto demonstra como a IA pode ser integrada ao dia a dia de um desenvolvedor para **aumentar produtividade e criatividade**.
+Fornecer comandos e direcionamentos (prompts)
 
+Avaliar respostas, ajustar caminhos e validar soluções
+
+Toda a construção do protótipo — incluindo estrutura, código, layout, textos e sugestões técnicas — foi gerada pela IA, sempre com o objetivo de aprender como orientar corretamente uma IA para chegar a bons resultados.
+
+A IA foi utilizada como:
+
+🧠 Geradora de soluções técnicas
+
+🛠️ Criadora de código e estrutura inicial
+
+🎨 Apoio em UX/UI e fluxos de navegação
+
+📝 Geradora de textos e documentação
+
+Este projeto funciona como um estudo prático de prompt engineering, demonstrando como bons comandos podem resultar em aplicações funcionais em pouco tempo.
 ---
 
 ## 🛠️ Tecnologias Utilizadas
