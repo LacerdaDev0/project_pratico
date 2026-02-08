@@ -1,4 +1,4 @@
-
+import { getInstructors, Instructor } from '../services/instructorService';
 import React, { useState, useEffect, useRef } from 'react';
 import { Post, UserRole, User, MOCK_INSTRUCTORS } from '../types';
 // Fixed: Added CheckCircle2 and ClipboardCheck to the imports from lucide-react
@@ -24,6 +24,17 @@ interface FeedProps {
 }
 
 const Feed: React.FC<FeedProps> = ({ user, userName, userRole, posts, onBook, onViewSchedules, onSearch, onViewWallet, onCreatePost, onLoadMore, isLoadingMore, onViewPractical, onViewTheoretical, onViewStudies, onViewSimulado }) => {
+  // Esta parte cria uma "memória" para guardar os instrutores do banco
+  const [dbInstructors, setDbInstructors] = React.useState<Instructor[]>([]);
+
+  // Este comando roda assim que a página abre e busca os dados no Firebase
+  React.useEffect(() => {
+    const fetchFromFirebase = async () => {
+      const data = await getInstructors();
+      setDbInstructors(data);
+    };
+    fetchFromFirebase();
+  }, []);
   const [aiTip, setAiTip] = useState<string>("");
   const [isUpdating, setIsUpdating] = useState(false);
   const observerRef = useRef<HTMLDivElement | null>(null);
@@ -66,7 +77,7 @@ const Feed: React.FC<FeedProps> = ({ user, userName, userRole, posts, onBook, on
     return () => observer.disconnect();
   }, [isLoadingMore, onLoadMore, isCredentialed]);
 
-  const followedInstructors = MOCK_INSTRUCTORS.slice(0, 4);
+  const followedInstructors = dbInstructors.length > 0 ? dbInstructors : MOCK_INSTRUCTORS.slice(0, 4);
 
   // View para Aluno Credenciado
   if (isCredentialed) {
